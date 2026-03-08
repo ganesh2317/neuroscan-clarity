@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Download, Share2 } from "lucide-react";
+import { Download, Share2, FileText, Image, AlertTriangle, Clock, Shield, Activity } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { GlassCard } from "@/components/GlassCard";
 import { MRIViewer } from "@/components/results/MRIViewer";
@@ -7,28 +7,58 @@ import { MetricsPanel } from "@/components/results/MetricsPanel";
 import { ComparisonTable } from "@/components/results/ComparisonTable";
 import { AttentionMaps } from "@/components/results/AttentionMaps";
 
+const summaryItems = [
+  { label: "PATIENT ID", value: "PT-2024-0847", icon: FileText, accent: false },
+  { label: "SCAN DATE", value: "2024-03-15 14:22", icon: Clock, accent: false },
+  { label: "PROCESSING", value: "24.3s", icon: Activity, accent: false },
+  { label: "CONFIDENCE", value: "97.6%", icon: Shield, accent: true },
+  { label: "FINDING", value: "GBM Grade IV", icon: AlertTriangle, accent: true, warning: true },
+];
+
 export default function ResultsPage() {
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto">
-        {/* Summary Bar */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <GlassCard className="mb-6 !p-4 flex flex-wrap items-center gap-6">
-            {[
-              { label: "Patient ID", value: "PT-2024-0847" },
-              { label: "Scan Date", value: "2024-03-15" },
-              { label: "Processing Time", value: "24.3s" },
-              { label: "Confidence", value: "97.6%" },
-            ].map((item) => (
-              <div key={item.label}>
-                <div className="text-xs text-muted-foreground">{item.label}</div>
-                <div className="font-semibold text-sm">{item.value}</div>
+        {/* Clinical Header */}
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h1 className="text-lg font-bold tracking-tight">Analysis Results</h1>
+              <p className="text-[10px] text-muted-foreground font-mono tracking-wider">
+                NEUROSCAN AI · MULTIMODAL BRAIN TUMOR SEGMENTATION · FAM+GCB PIPELINE v2.4
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+              <span className="text-[10px] font-mono text-accent">ANALYSIS COMPLETE</span>
+            </div>
+          </div>
+
+          {/* Summary bar */}
+          <div className="flex flex-wrap gap-2">
+            {summaryItems.map((item) => (
+              <div
+                key={item.label}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all ${
+                  item.warning
+                    ? "bg-warning/5 border-warning/20"
+                    : item.accent
+                    ? "bg-primary/5 border-primary/15"
+                    : "bg-secondary/20 border-white/5"
+                }`}
+              >
+                <item.icon className={`w-3 h-3 ${item.warning ? "text-warning" : "text-muted-foreground"}`} />
+                <div>
+                  <div className="text-[8px] text-muted-foreground font-mono tracking-wider">{item.label}</div>
+                  <div className={`text-[11px] font-semibold font-mono ${item.warning ? "text-warning" : ""}`}>{item.value}</div>
+                </div>
               </div>
             ))}
-          </GlassCard>
+          </div>
         </motion.div>
 
-        <div className="grid lg:grid-cols-5 gap-6">
+        {/* Main content */}
+        <div className="grid lg:grid-cols-5 gap-4">
           <div className="lg:col-span-3">
             <MRIViewer />
           </div>
@@ -40,11 +70,30 @@ export default function ResultsPage() {
         <ComparisonTable />
         <AttentionMaps />
 
-        {/* Export */}
-        <div className="flex flex-wrap gap-3 mt-6">
-          <button className="btn-glass-primary text-sm inline-flex items-center gap-2"><Download className="w-4 h-4" /> Download Report PDF</button>
-          <button className="btn-glass-outline text-sm inline-flex items-center gap-2"><Download className="w-4 h-4" /> Download Segmentation Mask</button>
-          <button className="btn-glass-outline text-sm inline-flex items-center gap-2"><Share2 className="w-4 h-4" /> Share Results</button>
+        {/* Export bar */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="flex flex-wrap gap-2 mt-6 pt-4 border-t border-white/5"
+        >
+          <button className="btn-glass-primary text-[11px] inline-flex items-center gap-2 !px-4 !py-2">
+            <FileText className="w-3.5 h-3.5" /> Export Clinical Report (PDF)
+          </button>
+          <button className="btn-glass-outline text-[11px] inline-flex items-center gap-2 !px-4 !py-2">
+            <Image className="w-3.5 h-3.5" /> Download Segmentation Mask (NIfTI)
+          </button>
+          <button className="btn-glass-outline text-[11px] inline-flex items-center gap-2 !px-4 !py-2">
+            <Download className="w-3.5 h-3.5" /> DICOM Export
+          </button>
+          <button className="btn-glass-outline text-[11px] inline-flex items-center gap-2 !px-4 !py-2">
+            <Share2 className="w-3.5 h-3.5" /> Share with Physician
+          </button>
+        </motion.div>
+
+        {/* Disclaimer */}
+        <div className="mt-4 mb-8 text-[9px] text-muted-foreground/40 font-mono leading-relaxed">
+          <p>DISCLAIMER: This analysis is generated by an AI model and is intended for research and clinical decision support only. All findings must be reviewed and confirmed by a qualified radiologist or neurosurgeon before clinical action. Model validated on BraTS2022 benchmark (n=1251). Not FDA/CE-cleared for diagnostic use.</p>
         </div>
       </div>
     </DashboardLayout>
